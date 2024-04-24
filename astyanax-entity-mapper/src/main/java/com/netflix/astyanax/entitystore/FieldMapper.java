@@ -70,7 +70,7 @@ public class FieldMapper<T> {
         }
         else {
             Order order = Order.valueOf(orderByAnnotation.value());
-            reversed = (order == Order.DESC);
+            reversed = order == Order.DESC;
         }
     }
 
@@ -103,11 +103,11 @@ public class FieldMapper<T> {
     }
 
     public boolean isAscending() {
-        return reversed == false;
+        return !reversed;
     }
     
     public boolean isDescending() {
-        return reversed == true;
+        return reversed;
     }
     
     public String getName() {

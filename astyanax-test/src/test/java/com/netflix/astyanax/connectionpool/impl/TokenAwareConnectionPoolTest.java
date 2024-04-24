@@ -30,8 +30,8 @@ import com.netflix.astyanax.test.TokenTestOperation;
 import com.netflix.astyanax.util.TokenGenerator;
 
 public class TokenAwareConnectionPoolTest extends BaseConnectionPoolTest {
-    private static Logger LOG = LoggerFactory.getLogger(TokenAwareConnectionPoolTest.class);
-    private static Operation<TestClient, String> dummyOperation = new TestOperation();
+    private static final Logger LOG = LoggerFactory.getLogger(TokenAwareConnectionPoolTest.class);
+    private static final Operation<TestClient, String> dummyOperation = new TestOperation();
 
     protected ConnectionPool<TestClient> createPool() {
         ConnectionPoolConfiguration config = new ConnectionPoolConfigurationImpl(
@@ -41,7 +41,7 @@ public class TokenAwareConnectionPoolTest extends BaseConnectionPoolTest {
 
         CountingConnectionPoolMonitor monitor = new CountingConnectionPoolMonitor();
 
-        return new TokenAwareConnectionPoolImpl<TestClient>(
+        return new TokenAwareConnectionPoolImpl<>(
                 config, new TestConnectionFactory(config, monitor), monitor);
     }
 

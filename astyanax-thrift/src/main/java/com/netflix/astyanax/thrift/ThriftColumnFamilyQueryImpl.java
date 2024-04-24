@@ -88,7 +88,7 @@ import com.netflix.astyanax.thrift.model.ThriftSuperColumnImpl;
  * @param <C>
  */
 public class ThriftColumnFamilyQueryImpl<K, C> implements ColumnFamilyQuery<K, C> {
-    private final static Logger LOG = LoggerFactory.getLogger(ThriftColumnFamilyQueryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ThriftColumnFamilyQueryImpl.class);
 
     final ConnectionPool<Cassandra.Client> connectionPool;
     final ColumnFamily<K, C>               columnFamily;
@@ -215,12 +215,14 @@ public class ThriftColumnFamilyQueryImpl<K, C> implements ColumnFamilyQuery<K, C
                                     // that will later be dropped
                                     if (firstPage) {
                                         firstPage = false;
-                                        if (predicate.getSlice_range().getCount() != Integer.MAX_VALUE)
+                                        if (predicate.getSlice_range().getCount() != Integer.MAX_VALUE) {
                                             predicate.getSlice_range().setCount(predicate.getSlice_range().getCount() + 1);
+                                        }
                                     }
                                     else {
-                                        if (!columnList.isEmpty())
+                                        if (!columnList.isEmpty()) {
                                             columnList.remove(0);
+                                        }
                                     }
 
                                     // Set the start column for the next page to
@@ -243,9 +245,8 @@ public class ThriftColumnFamilyQueryImpl<K, C> implements ColumnFamilyQuery<K, C
                                         }
                                     }
                                 }
-                                ColumnList<C> result = new ThriftColumnOrSuperColumnListImpl<C>(columnList,
+                                return new ThriftColumnOrSuperColumnListImpl<C>(columnList,
                                         columnFamily.getColumnSerializer());
-                                return result;
                             }
 
                             @Override
@@ -328,8 +329,9 @@ public class ThriftColumnFamilyQueryImpl<K, C> implements ColumnFamilyQuery<K, C
 
                                             if (sosc.isSetColumn()) {
                                                 cosc = new ColumnOrSuperColumn().setColumn(sosc.getColumn());
-                                                if (!useOriginalTimestamp)
+                                                if (!useOriginalTimestamp) {
                                                     cosc.getColumn().setTimestamp(currentTime);
+                                                }
                                             }
                                             else if (sosc.isSetSuper_column()) {
                                                 cosc = new ColumnOrSuperColumn().setSuper_column(sosc.getSuper_column());
@@ -404,10 +406,12 @@ public class ThriftColumnFamilyQueryImpl<K, C> implements ColumnFamilyQuery<K, C
                                 // Same call for standard and super columns via
                                 // the ColumnParent
                                 KeyRange range = new KeyRange();
-                                if (startKey != null)
+                                if (startKey != null) {
                                     range.setStart_key(columnFamily.getKeySerializer().toByteBuffer(startKey));
-                                if (endKey != null)
+                                }
+                                if (endKey != null) {
                                     range.setEnd_key(columnFamily.getKeySerializer().toByteBuffer(endKey));
+                                }
                                 range.setCount(count).setStart_token(startToken).setEnd_token(endToken);
 
                                 List<org.apache.cassandra.thrift.KeySlice> keySlices = client.get_range_slices(
@@ -425,8 +429,9 @@ public class ThriftColumnFamilyQueryImpl<K, C> implements ColumnFamilyQuery<K, C
 
                             @Override
                             public ByteBuffer getRowKey() {
-                                if (startKey != null)
+                                if (startKey != null) {
                                     return columnFamily.getKeySerializer().toByteBuffer(startKey);
+                                }
                                 return null;
                             }
                         }, retry);
@@ -526,7 +531,7 @@ public class ThriftColumnFamilyQueryImpl<K, C> implements ColumnFamilyQuery<K, C
     }
 
     @Override
-    public RowSliceQuery<K, C> getKeySlice(final K keys[]) {
+    public RowSliceQuery<K, C> getKeySlice(final K[] keys) {
         return getKeySlice(Arrays.asList(keys));
     }
 
@@ -698,7 +703,7 @@ public class ThriftColumnFamilyQueryImpl<K, C> implements ColumnFamilyQuery<K, C
 
     @Override
     public AllRowsQuery<K, C> getAllRows() {
-        return new ThriftAllRowsQueryImpl<K, C>(this);
+        return new ThriftAllRowsQueryImpl<>(this);
     }
 
     @Override
